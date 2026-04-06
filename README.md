@@ -198,7 +198,7 @@ Vercel (Frontend Hosting)
 | 5 | No server-side logic |
 
 
-Architechture Flow:
+Architecture Flow:
 
 User (Browser)
     ↓
