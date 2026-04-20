@@ -38,6 +38,13 @@ export function ApplicationsPage() {
     navigate('/login', { replace: true });
   }
 
+  function renderContent() {
+    if (isLoading) return <LoadingState />;
+    if (isError) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
+    if (!data || data.length === 0) return <EmptyState />;
+    return <ApplicationsTable applications={data} isRefetching={isFetching} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200">
@@ -53,12 +60,7 @@ export function ApplicationsPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        {isLoading && <LoadingState />}
-        {isError && <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />}
-        {data && data.length === 0 && <EmptyState />}
-        {data && data.length > 0 && (
-          <ApplicationsTable applications={data} isRefetching={isFetching} />
-        )}
+        {renderContent()}
       </main>
     </div>
   );

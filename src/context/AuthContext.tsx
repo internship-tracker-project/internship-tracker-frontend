@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   clearStoredToken,
   getStoredToken,
@@ -24,6 +25,7 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 );
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [token, setTokenState] = useState<string | null>(() => getStoredToken());
 
   const setToken = useCallback((next: string) => {
@@ -34,7 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearStoredToken();
     setTokenState(null);
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ token, isAuthenticated: token !== null, setToken, logout }),
