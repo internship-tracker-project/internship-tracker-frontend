@@ -1,16 +1,22 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { register } from '../features/auth/api';
 import { useAuth } from '../context/useAuth';
 
+type RedirectState = { from?: { pathname?: string } } | null;
+
 export function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setToken } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const redirectTo =
+    (location.state as RedirectState)?.from?.pathname ?? '/applications';
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +31,7 @@ export function RegisterPage() {
     try {
       const { access_token } = await register({ email, password });
       setToken(access_token);
-      navigate('/applications', { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setError('An account with that email already exists.');
