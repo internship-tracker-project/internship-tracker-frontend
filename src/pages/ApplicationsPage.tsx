@@ -2,25 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApplications } from '../features/applications/hooks/useApplications';
 import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
+import { StatusBadge } from '../features/applications/components/StatusBadge';
 import { useAuth } from '../context/useAuth';
-import type { Application, ApplicationStatus } from '../types/application';
-
-const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  APPLIED: 'bg-slate-100 text-slate-700',
-  INTERVIEW: 'bg-amber-100 text-amber-800',
-  OFFER: 'bg-emerald-100 text-emerald-800',
-  REJECTED: 'bg-rose-100 text-rose-800',
-};
-
-function StatusBadge({ status }: { status: ApplicationStatus }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status]}`}
-    >
-      {status}
-    </span>
-  );
-}
+import type { Application } from '../types/application';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
