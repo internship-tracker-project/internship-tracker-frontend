@@ -13,9 +13,11 @@ dist
 dist-ssr
 *.local
 
-# Claude
-Claude.md
+# Local tooling
 .claude
+CLAUDE.md
+CC-Session-Logs/
+.github/workflows/
 
 # Editor directories and files
 .vscode/*
