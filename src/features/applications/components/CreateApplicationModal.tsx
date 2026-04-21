@@ -34,11 +34,11 @@ export function CreateApplicationModal({ onClose }: Props) {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape' && !isPending) onClose();
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isPending]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,8 +74,16 @@ export function CreateApplicationModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-application-title"
+        className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+      >
+        <h2
+          id="create-application-title"
+          className="text-lg font-semibold text-slate-900 mb-4"
+        >
           New application
         </h2>
         {errors.topLevel && (
@@ -83,7 +91,7 @@ export function CreateApplicationModal({ onClose }: Props) {
             {errors.topLevel}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label
               htmlFor="company"
