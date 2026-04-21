@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApplications } from '../features/applications/hooks/useApplications';
 import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
 import { ApplicationCard } from '../features/applications/components/ApplicationCard';
+import { ApplicationDetailModal } from '../features/applications/components/ApplicationDetailModal';
 import { useAuth } from '../context/useAuth';
 import type { Application } from '../types/application';
 
@@ -11,6 +12,8 @@ export function ApplicationsPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
 
   function handleLogout() {
     logout();
@@ -21,7 +24,13 @@ export function ApplicationsPage() {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
     if (!data || data.length === 0) return <EmptyState />;
-    return <ApplicationsGrid applications={data} isRefetching={isFetching} />;
+    return (
+      <ApplicationsGrid
+        applications={data}
+        isRefetching={isFetching}
+        onSelect={setSelectedApplication}
+      />
+    );
   }
 
   return (
@@ -52,6 +61,12 @@ export function ApplicationsPage() {
 
       {isCreateOpen && (
         <CreateApplicationModal onClose={() => setIsCreateOpen(false)} />
+      )}
+      {selectedApplication && (
+        <ApplicationDetailModal
+          application={selectedApplication}
+          onClose={() => setSelectedApplication(null)}
+        />
       )}
     </div>
   );
@@ -90,9 +105,11 @@ function EmptyState() {
 function ApplicationsGrid({
   applications,
   isRefetching,
+  onSelect,
 }: {
   applications: Application[];
   isRefetching: boolean;
+  onSelect: (application: Application) => void;
 }) {
   return (
     <div>
@@ -104,9 +121,7 @@ function ApplicationsGrid({
           <ApplicationCard
             key={app.id}
             application={app}
-            onClick={() => {
-              // detail modal wired in a follow-up commit
-            }}
+            onClick={() => onSelect(app)}
           />
         ))}
       </div>
