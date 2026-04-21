@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import axios from 'axios';
 import { useCreateApplication } from '../hooks/useCreateApplication';
+import { mapServerError } from '../errors';
 import {
   ApplicationFormFields,
   type ApplicationFormValues,
@@ -121,14 +121,3 @@ export function CreateApplicationModal({ onClose }: Props) {
   );
 }
 
-function mapServerError(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    if (!err.response) {
-      return 'Network error. Check your connection and try again.';
-    }
-    if (err.response.status === 400) {
-      return 'Please check your details and try again.';
-    }
-  }
-  return 'Something went wrong. Please try again.';
-}
