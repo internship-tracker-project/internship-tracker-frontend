@@ -2,17 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApplications } from '../features/applications/hooks/useApplications';
 import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
-import { StatusBadge } from '../features/applications/components/StatusBadge';
+import { ApplicationCard } from '../features/applications/components/ApplicationCard';
 import { useAuth } from '../context/useAuth';
 import type { Application } from '../types/application';
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
 
 export function ApplicationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useApplications();
@@ -29,7 +21,7 @@ export function ApplicationsPage() {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
     if (!data || data.length === 0) return <EmptyState />;
-    return <ApplicationsTable applications={data} isRefetching={isFetching} />;
+    return <ApplicationsGrid applications={data} isRefetching={isFetching} />;
   }
 
   return (
@@ -95,7 +87,7 @@ function EmptyState() {
   );
 }
 
-function ApplicationsTable({
+function ApplicationsGrid({
   applications,
   isRefetching,
 }: {
@@ -103,50 +95,23 @@ function ApplicationsTable({
   isRefetching: boolean;
 }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+    <div>
       {isRefetching && (
-        <div className="px-6 py-2 text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-          Updating…
-        </div>
+        <p className="text-xs text-slate-500 mb-3">Updating…</p>
       )}
-      <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200">
-          <tr>
-            <Th>Company</Th>
-            <Th>Role</Th>
-            <Th>Status</Th>
-            <Th>Location</Th>
-            <Th>Applied</Th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200">
-          {applications.map((app) => (
-            <tr key={app.id} className="hover:bg-slate-50">
-              <Td className="font-medium text-slate-900">{app.company}</Td>
-              <Td>{app.role}</Td>
-              <Td>
-                <StatusBadge status={app.status} />
-              </Td>
-              <Td>{app.location ?? '—'}</Td>
-              <Td>{formatDate(app.appliedAt)}</Td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {applications.map((app) => (
+          <ApplicationCard
+            key={app.id}
+            application={app}
+            onClick={() => {
+              // detail modal wired in a follow-up commit
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="text-left text-xs font-medium text-slate-600 uppercase tracking-wide px-6 py-3">
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-6 py-3 text-sm text-slate-700 ${className}`}>{children}</td>;
 }
 
 function errorMessage(err: unknown): string {
