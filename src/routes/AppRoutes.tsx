@@ -1,15 +1,31 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { LoginPage } from '../pages/LoginPage';
+import { RegisterPage } from '../pages/RegisterPage';
+import { ApplicationsPage } from '../pages/ApplicationsPage';
+import { RequireAuth } from './RequireAuth';
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element= {<div>Dashboard</div>} />
-        <Route path="/login" element = {<div>Login</div>} />
-        <Route path="/register" element = {<div>Register</div>} />
-        <Route path="/applications" element = {<div>Applications</div>} />
-        <Route path="/analytics" element = {<div>Analytics</div>} />
-        <Route path="*" element = {<div>404 Not Found</div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <Navigate to="/applications" replace />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/applications"
+          element={
+            <RequireAuth>
+              <ApplicationsPage />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
