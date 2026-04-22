@@ -24,3 +24,7 @@ export async function updateApplication(
   const response = await api.patch<Application>(`/applications/${id}`, input);
   return response.data;
 }
+
+export async function deleteApplication(id: string): Promise<void> {
+  await api.delete(`/applications/${id}`);
+}

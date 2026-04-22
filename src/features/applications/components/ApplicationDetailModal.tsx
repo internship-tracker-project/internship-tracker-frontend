@@ -5,6 +5,7 @@ import type {
   UpdateApplicationInput,
 } from '../../../types/application';
 import { useUpdateApplication } from '../hooks/useUpdateApplication';
+import { useDeleteApplication } from '../hooks/useDeleteApplication';
 import { mapServerError } from '../errors';
 import { StatusBadge } from './StatusBadge';
 import {
@@ -17,7 +18,7 @@ type Props = {
   onClose: () => void;
 };
 
-type Mode = 'view' | 'edit';
+type Mode = 'view' | 'edit' | 'confirm-delete';
 
 type FieldErrors = {
   company?: string;
@@ -51,7 +52,8 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
   );
   const [errors, setErrors] = useState<FieldErrors>({});
   const updateMutation = useUpdateApplication();
-  const isPending = updateMutation.isPending;
+  const deleteMutation = useDeleteApplication();
+  const isPending = updateMutation.isPending || deleteMutation.isPending;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -74,6 +76,32 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
     setErrors({});
     setValues(valuesFromApplication(displayed));
     setMode('view');
+  }
+
+  function enterConfirmDelete() {
+    setErrors({});
+    setMode('confirm-delete');
+  }
+
+  function cancelDelete() {
+    setErrors({});
+    setMode('view');
+  }
+
+  function handleConfirmDelete() {
+    setErrors({});
+    deleteMutation.mutate(displayed.id, {
+      onSuccess: () => {
+        onClose();
+      },
+      onError: (err) => {
+        if (isMissingResource(err)) {
+          onClose();
+          return;
+        }
+        setErrors({ topLevel: mapServerError(err) });
+      },
+    });
   }
 
   function handleChange(patch: Partial<ApplicationFormValues>) {
@@ -134,7 +162,11 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
           id="application-detail-title"
           className="text-xl font-semibold text-slate-900 mb-1"
         >
-          {mode === 'edit' ? 'Edit application' : displayed.company}
+          {mode === 'edit'
+            ? 'Edit application'
+            : mode === 'confirm-delete'
+              ? 'Delete application?'
+              : displayed.company}
         </h2>
         {mode === 'view' && (
           <p className="text-sm text-slate-700 mb-4">{displayed.role}</p>
@@ -146,7 +178,7 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
           </div>
         )}
 
-        {mode === 'view' ? (
+        {mode === 'view' && (
           <>
             <dl className="space-y-3 mb-6">
               <Field label="Status">
@@ -183,6 +215,13 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
               </button>
               <button
                 type="button"
+                onClick={enterConfirmDelete}
+                className="text-sm text-rose-700 hover:text-rose-900 px-4 py-2"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
                 onClick={enterEditMode}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-md transition"
               >
@@ -190,7 +229,9 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
               </button>
             </div>
           </>
-        ) : (
+        )}
+
+        {mode === 'edit' && (
           <form onSubmit={handleEditSubmit} noValidate className="space-y-4">
             <ApplicationFormFields
               values={values}
@@ -217,6 +258,32 @@ export function ApplicationDetailModal({ application, onClose }: Props) {
               </button>
             </div>
           </form>
+        )}
+
+        {mode === 'confirm-delete' && (
+          <>
+            <p className="text-sm text-slate-700 mb-6">
+              Delete this application? This can&apos;t be undone.
+            </p>
+            <div className="flex justify-end items-center gap-2">
+              <button
+                type="button"
+                onClick={cancelDelete}
+                disabled={isPending}
+                className="text-sm text-slate-600 hover:text-slate-900 px-4 py-2 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isPending}
+                className="bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white font-medium px-4 py-2 rounded-md transition"
+              >
+                {isPending ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
