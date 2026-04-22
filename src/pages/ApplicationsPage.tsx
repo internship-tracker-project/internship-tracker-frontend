@@ -1,24 +1,16 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useApplications } from '../features/applications/hooks/useApplications';
 import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
 import { ApplicationCard } from '../features/applications/components/ApplicationCard';
 import { ApplicationDetailModal } from '../features/applications/components/ApplicationDetailModal';
-import { useAuth } from '../context/useAuth';
+import { AppHeader } from '../components/AppHeader';
 import type { Application } from '../types/application';
 
 export function ApplicationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useApplications();
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
-
-  function handleLogout() {
-    logout();
-    navigate('/login', { replace: true });
-  }
 
   function renderContent() {
     if (isLoading) return <LoadingState />;
@@ -35,25 +27,14 @@ export function ApplicationsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-slate-900">Applications</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-3 py-1.5 rounded-md transition"
-            >
-              New application
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-slate-600 hover:text-slate-900"
-            >
-              Log out
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader>
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-3 py-1.5 rounded-md transition"
+        >
+          New application
+        </button>
+      </AppHeader>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
         {renderContent()}
