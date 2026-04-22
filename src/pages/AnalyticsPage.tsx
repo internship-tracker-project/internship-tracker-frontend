@@ -3,6 +3,7 @@ import { AppHeader } from '../components/AppHeader';
 import { useAnalyticsSummary } from '../features/analytics/hooks/useAnalyticsSummary';
 import { SummaryCards } from '../features/analytics/components/SummaryCards';
 import { StatusDistributionChart } from '../features/analytics/components/StatusDistributionChart';
+import { WeeklyTimeseriesChart } from '../features/analytics/components/WeeklyTimeseriesChart';
 import type { AnalyticsSummary } from '../types/analytics';
 
 export function AnalyticsPage() {
@@ -65,6 +66,7 @@ function Dashboard({ summary }: { summary: AnalyticsSummary }) {
     <div className="space-y-6">
       <SummaryCards total={summary.total} offerRate={summary.offerRate} />
       <StatusDistributionChart statusCounts={summary.statusCounts} />
+      <WeeklyTimeseriesChart timeSeries={summary.timeSeries} />
     </div>
   );
 }
