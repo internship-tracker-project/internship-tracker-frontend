@@ -2,39 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApplications } from '../features/applications/hooks/useApplications';
 import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
+import { ApplicationCard } from '../features/applications/components/ApplicationCard';
+import { ApplicationDetailModal } from '../features/applications/components/ApplicationDetailModal';
 import { useAuth } from '../context/useAuth';
-import type { Application, ApplicationStatus } from '../types/application';
-
-const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  APPLIED: 'bg-slate-100 text-slate-700',
-  INTERVIEW: 'bg-amber-100 text-amber-800',
-  OFFER: 'bg-emerald-100 text-emerald-800',
-  REJECTED: 'bg-rose-100 text-rose-800',
-};
-
-function StatusBadge({ status }: { status: ApplicationStatus }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status]}`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+import type { Application } from '../types/application';
 
 export function ApplicationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useApplications();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
 
   function handleLogout() {
     logout();
@@ -45,7 +24,13 @@ export function ApplicationsPage() {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
     if (!data || data.length === 0) return <EmptyState />;
-    return <ApplicationsTable applications={data} isRefetching={isFetching} />;
+    return (
+      <ApplicationsGrid
+        applications={data}
+        isRefetching={isFetching}
+        onSelect={setSelectedApplication}
+      />
+    );
   }
 
   return (
@@ -76,6 +61,12 @@ export function ApplicationsPage() {
 
       {isCreateOpen && (
         <CreateApplicationModal onClose={() => setIsCreateOpen(false)} />
+      )}
+      {selectedApplication && (
+        <ApplicationDetailModal
+          application={selectedApplication}
+          onClose={() => setSelectedApplication(null)}
+        />
       )}
     </div>
   );
@@ -111,58 +102,31 @@ function EmptyState() {
   );
 }
 
-function ApplicationsTable({
+function ApplicationsGrid({
   applications,
   isRefetching,
+  onSelect,
 }: {
   applications: Application[];
   isRefetching: boolean;
+  onSelect: (application: Application) => void;
 }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+    <div>
       {isRefetching && (
-        <div className="px-6 py-2 text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-          Updating…
-        </div>
+        <p className="text-xs text-slate-500 mb-3">Updating…</p>
       )}
-      <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200">
-          <tr>
-            <Th>Company</Th>
-            <Th>Role</Th>
-            <Th>Status</Th>
-            <Th>Location</Th>
-            <Th>Applied</Th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200">
-          {applications.map((app) => (
-            <tr key={app.id} className="hover:bg-slate-50">
-              <Td className="font-medium text-slate-900">{app.company}</Td>
-              <Td>{app.role}</Td>
-              <Td>
-                <StatusBadge status={app.status} />
-              </Td>
-              <Td>{app.location ?? '—'}</Td>
-              <Td>{formatDate(app.appliedAt)}</Td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {applications.map((app) => (
+          <ApplicationCard
+            key={app.id}
+            application={app}
+            onClick={() => onSelect(app)}
+          />
+        ))}
+      </div>
     </div>
   );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="text-left text-xs font-medium text-slate-600 uppercase tracking-wide px-6 py-3">
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-6 py-3 text-sm text-slate-700 ${className}`}>{children}</td>;
 }
 
 function errorMessage(err: unknown): string {

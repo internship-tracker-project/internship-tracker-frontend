@@ -1,22 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import axios from 'axios';
 import { useCreateApplication } from '../hooks/useCreateApplication';
-import type {
-  ApplicationStatus,
-  CreateApplicationInput,
-} from '../../../types/application';
+import { mapServerError } from '../errors';
+import {
+  ApplicationFormFields,
+  type ApplicationFormValues,
+  type ApplicationFormFieldErrors,
+} from './ApplicationFormFields';
+import type { CreateApplicationInput } from '../../../types/application';
 
-const STATUS_OPTIONS: ApplicationStatus[] = [
-  'APPLIED',
-  'INTERVIEW',
-  'OFFER',
-  'REJECTED',
-];
+type FieldErrors = ApplicationFormFieldErrors & { topLevel?: string };
 
-type FieldErrors = {
-  company?: string;
-  role?: string;
-  topLevel?: string;
+const INITIAL_VALUES: ApplicationFormValues = {
+  company: '',
+  role: '',
+  status: 'APPLIED',
+  location: '',
+  notes: '',
 };
 
 type Props = {
@@ -24,11 +23,7 @@ type Props = {
 };
 
 export function CreateApplicationModal({ onClose }: Props) {
-  const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
-  const [status, setStatus] = useState<ApplicationStatus>('APPLIED');
-  const [location, setLocation] = useState('');
-  const [notes, setNotes] = useState('');
+  const [values, setValues] = useState<ApplicationFormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<FieldErrors>({});
   const { mutate, isPending } = useCreateApplication();
 
@@ -40,12 +35,16 @@ export function CreateApplicationModal({ onClose }: Props) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, isPending]);
 
+  function handleChange(patch: Partial<ApplicationFormValues>) {
+    setValues((prev) => ({ ...prev, ...patch }));
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors({});
 
-    const trimmedCompany = company.trim();
-    const trimmedRole = role.trim();
+    const trimmedCompany = values.company.trim();
+    const trimmedRole = values.role.trim();
     const nextErrors: FieldErrors = {};
     if (!trimmedCompany) nextErrors.company = 'Company is required';
     if (!trimmedRole) nextErrors.role = 'Role is required';
@@ -57,11 +56,11 @@ export function CreateApplicationModal({ onClose }: Props) {
     const payload: CreateApplicationInput = {
       company: trimmedCompany,
       role: trimmedRole,
-      status,
+      status: values.status,
     };
-    const trimmedLocation = location.trim();
+    const trimmedLocation = values.location.trim();
     if (trimmedLocation) payload.location = trimmedLocation;
-    const trimmedNotes = notes.trim();
+    const trimmedNotes = values.notes.trim();
     if (trimmedNotes) payload.notes = trimmedNotes;
 
     mutate(payload, {
@@ -92,104 +91,13 @@ export function CreateApplicationModal({ onClose }: Props) {
           </div>
         )}
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          <div>
-            <label
-              htmlFor="company"
-              className="block text-sm font-medium text-slate-700 mb-1"
-            >
-              Company
-            </label>
-            <input
-              id="company"
-              type="text"
-              autoFocus
-              required
-              maxLength={100}
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            {errors.company && (
-              <p className="text-sm text-red-600 mt-1">{errors.company}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-slate-700 mb-1"
-            >
-              Role
-            </label>
-            <input
-              id="role"
-              type="text"
-              required
-              maxLength={200}
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            {errors.role && (
-              <p className="text-sm text-red-600 mt-1">{errors.role}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-slate-700 mb-1"
-            >
-              Status
-            </label>
-            <select
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium text-slate-700 mb-1"
-            >
-              Location <span className="text-slate-400">(optional)</span>
-            </label>
-            <input
-              id="location"
-              type="text"
-              maxLength={200}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="notes"
-              className="block text-sm font-medium text-slate-700 mb-1"
-            >
-              Notes <span className="text-slate-400">(optional)</span>
-            </label>
-            <textarea
-              id="notes"
-              rows={3}
-              maxLength={2000}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
-
+          <ApplicationFormFields
+            values={values}
+            onChange={handleChange}
+            errors={errors}
+            disabled={isPending}
+            autoFocusCompany
+          />
           <div className="flex justify-end items-center gap-2 pt-2">
             <button
               type="button"
@@ -213,14 +121,3 @@ export function CreateApplicationModal({ onClose }: Props) {
   );
 }
 
-function mapServerError(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    if (!err.response) {
-      return 'Network error. Check your connection and try again.';
-    }
-    if (err.response.status === 400) {
-      return 'Please check your details and try again.';
-    }
-  }
-  return 'Something went wrong. Please try again.';
-}

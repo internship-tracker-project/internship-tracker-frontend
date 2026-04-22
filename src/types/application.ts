@@ -24,3 +24,5 @@ export type CreateApplicationInput = {
   location?: string;
   notes?: string;
 };
+
+export type UpdateApplicationInput = Partial<CreateApplicationInput>;
