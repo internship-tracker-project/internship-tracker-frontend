@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { useAnalyticsSummary } from '../features/analytics/hooks/useAnalyticsSummary';
+import { SummaryCards } from '../features/analytics/components/SummaryCards';
 import type { AnalyticsSummary } from '../types/analytics';
 
 export function AnalyticsPage() {
@@ -61,9 +62,7 @@ function EmptyState() {
 function Dashboard({ summary }: { summary: AnalyticsSummary }) {
   return (
     <div className="space-y-6">
-      <p className="text-sm text-slate-500">
-        Total applications: {summary.total}
-      </p>
+      <SummaryCards total={summary.total} offerRate={summary.offerRate} />
     </div>
   );
 }
