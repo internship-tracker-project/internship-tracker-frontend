@@ -1,9 +1,15 @@
 import { AppHeader } from '../components/AppHeader';
+import { JobCard } from '../features/jobs/components/JobCard';
 import { useJobs } from '../features/jobs/hooks/useJobs';
-import type { JobsResponse } from '../types/job';
+import type { JobListing, JobsResponse } from '../types/job';
 
 export function JobsPage() {
   const { data, isLoading, isError, error, refetch } = useJobs({});
+
+  function handleTrack(job: JobListing) {
+    // Wired in c5
+    void job;
+  }
 
   function renderContent() {
     if (isLoading) return <LoadingState />;
@@ -12,7 +18,7 @@ export function JobsPage() {
         <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />
       );
     if (!data || data.results.length === 0) return <EmptyState />;
-    return <JobsList data={data} />;
+    return <JobsList data={data} onTrack={handleTrack} />;
   }
 
   return (
@@ -59,11 +65,24 @@ function EmptyState() {
   );
 }
 
-function JobsList({ data }: { data: JobsResponse }) {
+function JobsList({
+  data,
+  onTrack,
+}: {
+  data: JobsResponse;
+  onTrack: (job: JobListing) => void;
+}) {
   return (
-    <p className="text-sm text-slate-600">
-      Showing {data.results.length} of {data.total} jobs
-    </p>
+    <div>
+      <p className="text-sm text-slate-600 mb-4">
+        Showing {data.results.length} of {data.total} jobs
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.results.map((job) => (
+          <JobCard key={job.id} job={job} onTrack={onTrack} />
+        ))}
+      </div>
+    </div>
   );
 }
 
