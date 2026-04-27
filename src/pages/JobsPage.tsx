@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
+import { CreateApplicationModal } from '../features/applications/components/CreateApplicationModal';
 import { JobCard } from '../features/jobs/components/JobCard';
 import { useJobs } from '../features/jobs/hooks/useJobs';
 import type { JobListing, JobsFilters, JobsResponse } from '../types/job';
@@ -34,9 +35,10 @@ export function JobsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } =
     useJobs(filters);
 
+  const [trackingJob, setTrackingJob] = useState<JobListing | null>(null);
+
   function handleTrack(job: JobListing) {
-    // Wired in c5
-    void job;
+    setTrackingJob(job);
   }
 
   function renderContent() {
@@ -68,6 +70,17 @@ export function JobsPage() {
         />
         {renderContent()}
       </main>
+      {trackingJob && (
+        <CreateApplicationModal
+          onClose={() => setTrackingJob(null)}
+          initialValues={{
+            company: trackingJob.company,
+            role: trackingJob.title,
+            location: trackingJob.location ?? '',
+            notes: `Source: Adzuna\nApply: ${trackingJob.applyUrl}`,
+          }}
+        />
+      )}
     </div>
   );
 }
