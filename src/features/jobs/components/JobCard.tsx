@@ -6,7 +6,7 @@ type Props = {
 };
 
 function formatPostedDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', {
+  return new Date(iso).toLocaleDateString(undefined, {
     day: '2-digit',
     month: 'short',
   });

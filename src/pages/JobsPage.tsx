@@ -72,6 +72,7 @@ export function JobsPage() {
       </main>
       {trackingJob && (
         <CreateApplicationModal
+          key={trackingJob.id}
           onClose={() => setTrackingJob(null)}
           initialValues={{
             company: trackingJob.company,
@@ -98,20 +99,32 @@ function FilterRow({
 }) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-6">
-      <input
-        type="text"
-        value={qValue}
-        onChange={(e) => onQChange(e.target.value)}
-        placeholder="Search title or company"
-        className="flex-1 border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-      />
-      <input
-        type="text"
-        value={locationValue}
-        onChange={(e) => onLocationChange(e.target.value)}
-        placeholder="Location"
-        className="flex-1 border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-      />
+      <div className="flex-1">
+        <label htmlFor="jobs-filter-q" className="sr-only">
+          Search title or company
+        </label>
+        <input
+          id="jobs-filter-q"
+          type="text"
+          value={qValue}
+          onChange={(e) => onQChange(e.target.value)}
+          placeholder="Search title or company"
+          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        />
+      </div>
+      <div className="flex-1">
+        <label htmlFor="jobs-filter-location" className="sr-only">
+          Location
+        </label>
+        <input
+          id="jobs-filter-location"
+          type="text"
+          value={locationValue}
+          onChange={(e) => onLocationChange(e.target.value)}
+          placeholder="Location"
+          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        />
+      </div>
     </div>
   );
 }
