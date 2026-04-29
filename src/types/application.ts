@@ -16,3 +16,13 @@ export interface Application {
   updatedAt: string;
   userId: string;
 }
+
+export type CreateApplicationInput = {
+  company: string;
+  role: string;
+  status?: ApplicationStatus;
+  location?: string;
+  notes?: string;
+};
+
+export type UpdateApplicationInput = Partial<CreateApplicationInput>;
