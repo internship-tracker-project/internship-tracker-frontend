@@ -207,3 +207,24 @@ React (Vercel-hosted static app)
 NestJS API (Render)
     ↓  Prisma
 PostgreSQL (Supabase)
+
+## Deployment
+
+Hosted on Vercel; production deploys auto-trigger on every push to `main`.
+
+| Setting | Value |
+|---|---|
+| Framework preset | Vite (auto-detected) |
+| Build command | `npm run build` (auto-detected) |
+| Output directory | `dist` (auto-detected) |
+| Production branch | `main` |
+
+**Required environment variable** (set in Vercel project settings, all environments):
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | URL of the deployed Render backend, e.g. `https://internship-tracker-backend-5zmv.onrender.com` |
+
+`vercel.json` rewrites all paths to `/index.html` so that client-side routes (`/applications`, `/analytics`, `/jobs`) survive direct navigation and hard refresh.
+
+> **Note:** the Render free tier sleeps after ~15 minutes of inactivity. The first request after a long idle period (e.g. login) may take 20–30 seconds while the backend wakes up.
