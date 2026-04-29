@@ -21,6 +21,7 @@ export function AppHeader({ children }: Props) {
         <nav className="flex items-center gap-1 h-full">
           <Tab to="/applications">Applications</Tab>
           <Tab to="/analytics">Analytics</Tab>
+          <Tab to="/jobs">Jobs</Tab>
         </nav>
         <div className="flex items-center gap-3">
           {children}

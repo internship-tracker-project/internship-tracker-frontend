@@ -20,10 +20,14 @@ const INITIAL_VALUES: ApplicationFormValues = {
 
 type Props = {
   onClose: () => void;
+  initialValues?: Partial<ApplicationFormValues>;
 };
 
-export function CreateApplicationModal({ onClose }: Props) {
-  const [values, setValues] = useState<ApplicationFormValues>(INITIAL_VALUES);
+export function CreateApplicationModal({ onClose, initialValues }: Props) {
+  const [values, setValues] = useState<ApplicationFormValues>(() => ({
+    ...INITIAL_VALUES,
+    ...initialValues,
+  }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const { mutate, isPending } = useCreateApplication();
 

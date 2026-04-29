@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { ApplicationsPage } from '../pages/ApplicationsPage';
 import { AnalyticsPage } from '../pages/AnalyticsPage';
+import { JobsPage } from '../pages/JobsPage';
 import { RequireAuth } from './RequireAuth';
 
 export function AppRoutes() {
@@ -32,6 +33,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <AnalyticsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/jobs"
+          element={
+            <RequireAuth>
+              <JobsPage />
             </RequireAuth>
           }
         />
